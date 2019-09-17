@@ -1,10 +1,7 @@
 # tfrecord-view
-How to consume data from TFRecord files, which are used in the Tensorflow object detection api (https://github.com/tensorflow/models/tree/master/research/object_detection).
+How to consume data from TFRecord files, which are used in the Tensorflow [object detection api](https://github.com/tensorflow/models/tree/master/research/object_detection). I use it to double check my augmentation pipeline (built with [imgaug](https://github.com/aleju/imgaug)), and TFRecord encoding.
 
-- Decoded each image, and uses OpenCV to display image with bounding boxes and labels (`view_records.py`)
-- Also includes script to illustrate how to create aTFRecord file from a bunch of images and annotation files in the Pascal VOC format (`voc_to_tfr.py`)
-
-Currently tested in Linux. I use this to double check my augmentation pipeline (built with [imgaug](https://github.com/aleju/imgaug)), and encoding of data into TFRecord files.
+Currently tested in Linux. Not sure about behavior in Windows.
 
 ## Installation
 Prereqs: tensorflow, opencv, and numpy. Note the object detection API doesn't yet work with Tensorflow 2 (https://github.com/tensorflow/models/issues/6423), so we will be using version 1 of Tensorflow.
