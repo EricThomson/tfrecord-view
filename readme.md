@@ -3,7 +3,14 @@ How to consume data from TFRecord files, which are used in the Tensorflow [objec
 
 Currently tested in Linux. Not sure about behavior in Windows.
 
-## Installation
+## Usage
+### Creating a TFRecord file
+If you need to create a TFRecord file, see `voc_to_tfr.py`. The images and annotation files are in `annotated_images/`.
+
+### Consuming a TFRecord file
+If you already have TFRecord file data, then use `view_records.py` to see how to consume it and show data. The function takes in the path to the TFRecord file, the dictionary of class labels, and a couple of optional keyword arguments like stride. It will then show the images with bounding boxes and labels for each object, if applicable.
+
+### Installation
 Prereqs: tensorflow, opencv, and numpy. Note the object detection API doesn't yet work with Tensorflow 2 (https://github.com/tensorflow/models/issues/6423), so we will be using version 1 of Tensorflow.
 
     git clone XXX
@@ -13,13 +20,6 @@ Prereqs: tensorflow, opencv, and numpy. Note the object detection API doesn't ye
     conda install -c anaconda tensorflow-gpu>=1.12
 
  This also assumes you have installed the object detection api (https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md), as we will use some utilities that come with it (in particular `utils.dataset_util`).
-
-## Usage
-### Creating a TFRecord file
-If you need to create a TFRecord file, see `voc_to_tfr.py`. The images and annotation files are in `annotated_images/`.
-
-### Consuming a TFRecord file
-If you already have TFRecord file data, then use `view_records.py` to see how to consume it and show data. The function takes in the path to the TFRecord file, the dictionary of class labels, and a couple of optional keyword arguments like stride. It will then show the images with bounding boxes and labels for each object, if applicable.
 
 ## For more info
 Construction of TFRecord files:

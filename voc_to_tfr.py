@@ -9,9 +9,8 @@ import tensorflow as tf
 import os
 import glob
 from lxml import etree
-from object_detection.utils import dataset_util
 
-#%%
+
 def create_tf_example(data,
                       image_path,
                       label_map_dict,
@@ -27,7 +26,7 @@ def create_tf_example(data,
 
     Inputs:
         data: dict holding PASCAL XML fields for a single image (obtained by
-            running dataset_util.recursive_parse_xml_to_dict)
+            running recursive_parse_xml_to_dict)
         image_path: Path to image
         label_map_dict: A map from string label names to integers ids.
         ignore_difficult_instances: Whether to skip difficult instances in the
@@ -47,22 +46,17 @@ def create_tf_example(data,
     height = int(data['size']['height'])
 
     #If no data['object'] there are no bounding boxes
-    try:
+    if 'object' in data:
         annotation_list = data['object']
-        annotated = True
-    except KeyError:
-        if verbose: print("No annotations for this one")
-        annotated = False
+        xmin = []
+        ymin = []
+        xmax = []
+        ymax = []
+        classes = []
+        classes_text = []
+        difficult_obj = []
+    
 
-    xmin = []
-    ymin = []
-    xmax = []
-    ymax = []
-    classes = []
-    classes_text = []
-    difficult_obj = []
-
-    if annotated:
         for annotation in annotation_list:
             difficult = bool(int(annotation['difficult']))
             if ignore_difficult_instances and difficult:
@@ -81,34 +75,97 @@ def create_tf_example(data,
             classes_text.append(annotation['name'].encode('utf8'))
             classes.append(label_map_dict[annotation['name']])
 
-    obj_features = {
-            'image/height': dataset_util.int64_feature(height),
-            'image/width': dataset_util.int64_feature(width),
-            'image/filename': dataset_util.bytes_feature(data['filename'].encode('utf8')),
-            'image/encoded': dataset_util.bytes_feature(encoded_image),
-            'image/object/bbox/xmin': dataset_util.float_list_feature(xmin),
-            'image/object/bbox/xmax': dataset_util.float_list_feature(xmax),
-            'image/object/bbox/ymin': dataset_util.float_list_feature(ymin),
-            'image/object/bbox/ymax': dataset_util.float_list_feature(ymax),
-            'image/object/class/text': dataset_util.bytes_list_feature(classes_text),
-            'image/object/class/label': dataset_util.int64_list_feature(classes),
-    }
-
+        obj_features = {
+                'image/height': int64_feature(height),
+                'image/width': int64_feature(width),
+                'image/filename': bytes_feature(data['filename'].encode('utf8')),
+                'image/encoded': bytes_feature(encoded_image),
+                'image/object/bbox/xmin': float_list_feature(xmin),
+                'image/object/bbox/xmax': float_list_feature(xmax),
+                'image/object/bbox/ymin': float_list_feature(ymin),
+                'image/object/bbox/ymax': float_list_feature(ymax),
+                'image/object/class/text': bytes_list_feature(classes_text),
+                'image/object/class/label': int64_list_feature(classes),
+                'image/annotated': int64_feature(0)
+        }
+    
+        tf_features = tf.train.Features(feature = obj_features)
+        tf_example = tf.train.Example(features = tf_features)
+    
+            
+    else:
+        if verbose: print("No annotations for this one")
+        obj_features = {
+                'image/height': int64_feature(height),
+                'image/width': int64_feature(width),
+                'image/filename': bytes_feature(data['filename'].encode('utf8')),
+                'image/encoded': bytes_feature(encoded_image),
+                'image/annotated': int64_feature(0)
+        }
+    
     tf_features = tf.train.Features(feature = obj_features)
     tf_example = tf.train.Example(features = tf_features)
-
     return tf_example
 
 
-#%%
-def main(_):
-    class_labels =    {"dog" : 1, "cat": 2 }
-    data_path = r"/home/eric/Pictures/cats_dogs/"
-    output_path =    data_path + r'cats_dogs.record'
-    verbose = 1
+#Following feature encoders are from models/research/object_detection/dataset_util.py
+def int64_feature(value):
+  return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
+
+def int64_list_feature(value):
+  return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
+
+
+def bytes_feature(value):
+  return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+
+def bytes_list_feature(value):
+  return tf.train.Feature(bytes_list=tf.train.BytesList(value=value))
+
+
+def float_list_feature(value):
+  return tf.train.Feature(float_list=tf.train.FloatList(value=value))
+
+#Following is from models/research/object_detection/dataset_util.py
+def recursive_parse_xml_to_dict(xml):
+  """Recursively parses XML contents to python dict.
+
+  We assume that `object` tags are the only ones that can appear
+  multiple times at the same level of a tree.
+
+  Args:
+    xml: xml tree obtained by parsing XML file contents using lxml.etree
+
+  Returns:
+    Python dictionary holding XML contents.
+  """
+  if not xml:
+    return {xml.tag: xml.text}
+  result = {}
+  for child in xml:
+    child_result = recursive_parse_xml_to_dict(child)
+    if child.tag != 'object':
+      result[child.tag] = child_result[child.tag]
+    else:
+      if child.tag not in result:
+        result[child.tag] = []
+      result[child.tag].append(child_result[child.tag])
+  return {xml.tag: result}
+
+#%%
+if __name__ == '__main__':
+    # Repo
+    class_labels =    {"dog" : 1, "cat": 2 }
+    data_path = r"annotated_images/"
+    output_path =    data_path + r'cats_dogs.record'
+    
+    
+    verbose = 1
     filename_query = os.path.join(data_path, '*.png')    #can change to any format (bmp, png etc)
     image_paths = np.sort(glob.glob(filename_query))
+    
     writer = tf.python_io.TFRecordWriter(output_path)
     for idx, image_path in enumerate(image_paths):
         xml_path = os.path.splitext(image_path)[0] + '.xml'
@@ -117,8 +174,9 @@ def main(_):
                 xml_str = fid.read()
 
         xml = etree.fromstring(xml_str)
-        xml_data = dataset_util.recursive_parse_xml_to_dict(xml)['annotation']
-        tf_example = create_tf_example(xml_data, image_path, class_labels, verbose = verbose)    #Leaving out    FLAGS.ignore_difficult_instances
+        xml_data = recursive_parse_xml_to_dict(xml)['annotation']
+        tf_example = create_tf_example(xml_data, image_path, class_labels, verbose = verbose)  
         writer.write(tf_example.SerializeToString())
 
     writer.close()
+    print("Done encoding data TFRecord file")

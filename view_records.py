@@ -8,13 +8,13 @@ Hit 'n' for 'next' image, or 'esc' to quit.
 Part of tensorflow-view repo: https://github.com/EricThomson/tfrecord-view
 
 """
-import warnings
-warnings.filterwarnings('ignore', category = FutureWarning)  #tf 1.14 and np 1.17 are clashing: temporary solution
 
-import tensorflow as tf
 import cv2
 import numpy as np
+import tensorflow as tf
 tf.enable_eager_execution()
+import warnings
+warnings.filterwarnings('ignore', category = FutureWarning)  #tf 1.14 and np 1.17 are clashing: temporary solution
 
 def cv_bbox(image, bbox, color = (255, 255, 255), line_width = 2):
     """
@@ -59,7 +59,8 @@ def view_records(file_path, class_labels, stride = 1, verbose = 1):
     num_records = dataset.reduce(np.int64(0), lambda x, _: x + 1).numpy()
 
     if verbose:
-        print(f"Going through {num_records} records with a stride of {stride}")
+        print(f"\nGoing through {num_records} records with a stride of {stride}.")
+        print("Enter 'n' to bring up next image in record.\n")
     for im_ind in range(num_records):
 
         #Parse and process example
@@ -120,8 +121,9 @@ def view_records(file_path, class_labels, stride = 1, verbose = 1):
 #%%
 if __name__ == '__main__':
     class_labels =  {"dog" : 1, "cat": 2 }
-    data_path = r"/home/eric/Pictures/cats_dogs/"
-    record_path =  data_path + r'cats_dogs.record'
+    #Make the following using voc_to_tfr.py
+    data_path = r"annotated_images/cats_dogs.record"
+
     verbose = 1
     stride = 1
-    view_records(record_path, class_labels, stride = stride, verbose = verbose)
+    view_records(data_path, class_labels, stride = stride, verbose = verbose)
