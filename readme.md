@@ -1,5 +1,5 @@
 # tfrecord-view
-How to consume data from TFRecord files, which are used in the Tensorflow [object detection api](https://github.com/tensorflow/models/tree/master/research/object_detection). I use it to double check my augmentation pipeline (built with [imgaug](https://github.com/aleju/imgaug)), and TFRecord encoding.
+How to consume data from TFRecord files, which are used in the Tensorflow [object detection api](https://github.com/tensorflow/models/tree/master/research/object_detection). I use it to double ensure that my augmentation pipeline and TFRecord encoding worked properly.
 
 Currently tested in Linux. Not sure about behavior in Windows.
 
