@@ -1,4 +1,6 @@
 """
+The tf2 version is based in https://github.com/jschw/tfrecord-view/blob/master/tfrecord_view_gui.py
+
 view_records.py:
 Consume and display data from a tfrecord file: pulls image and bounding boxes for display
 so you can make sure things look reasonabloe, e.g., after augmentation.
