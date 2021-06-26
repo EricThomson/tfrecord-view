@@ -8,10 +8,10 @@ Currently tested in Linux. Not sure about behavior in Windows.
 If you need to create a TFRecord file, see `voc_to_tfr.py`. The images and annotation files are in `annotated_images/`.
 
 ### Consuming a TFRecord file
-If you already have TFRecord file data, then use `view_records.py` to see how to consume it and show data. The function takes in the path to the TFRecord file, the dictionary of class labels, and a couple of optional keyword arguments like stride. It will then show the images with bounding boxes and labels for each object, if applicable.
+If you already have TFRecord file data, then use `view_records.py` or `view_records_tf2.py` to see how to consume it and show data. The function takes in the path to the TFRecord file, the dictionary of class labels, and a couple of optional keyword arguments like stride. It will then show the images with bounding boxes and labels for each object, if applicable.
 
 ### Installation
-Prereqs: tensorflow, opencv, and numpy. Note the object detection API doesn't yet work with Tensorflow 2 (https://github.com/tensorflow/models/issues/6423), so we will be using version 1 of Tensorflow.
+Prereqs: tensorflow, opencv, and numpy.
 
     git clone XXX
     conda create --name tfrecord-view
